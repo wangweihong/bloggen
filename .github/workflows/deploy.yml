@@ -2,9 +2,13 @@
 name: deploy
 on:
   push:
-  workflow_dispatch:
+    branches:
+      - master
+  pull_request:
+      types: [opened, reopened, synchronize, ready_for_review]
 jobs:
-  build:
+  # 构建静态HTML代码并推送到GithubPages
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,6 +37,8 @@ jobs:
         run: hugo
 
       - name: Deploy Web
+        # only deploy when master branch changes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: peaceiris/actions-gh-pages@v3
         with:
           # GitHub Personal Access Tokens 用于访问 GitHub 仓库
