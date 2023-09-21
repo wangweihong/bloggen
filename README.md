@@ -50,6 +50,10 @@ theme = "KeepIt"
 6. `git push -u origin master`
 7. 网页访问wangweihong.github.io
 
+# 博客更新
+配置Github Actions工作流。
+后续只需要更新blogen仓库代码，推送到github时触发github action自动生成博客静态HTML文件并推送到博客仓库。
+
 # 问题
 ## 本地运行`hugo server`失败
 ```
