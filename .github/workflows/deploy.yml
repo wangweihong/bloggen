@@ -2,22 +2,20 @@
 name: deploy
 on:
   push:
-  workflow_dispatch:
+#    branches:
+#      - master
+#    pull_request:
+#      types: [opened, reopened, synchronize, ready_for_review]
+
+env:
+  COMMIT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  BRANCH: ${{ github.event_name == 'pull_request' && format('refs/heads/{0}', github.event.pull_request.head.ref) || github.ref }}
+
 jobs:
   # 构建静态HTML代码并推送到GithubPages
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug environment
-        # https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
-        run: |
-          echo github.event: ${{ github.event }}
-          echo github.event_path: ${{ github.event_path }}
-          echo github.event_name: ${{ github.event_name }}
-          echo github.ref: ${{ github.ref }}
-          echo github.workspace: ${{ github.workspace }}
-          echo github.workflow: ${{ github.workflow }}
-
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -59,3 +57,39 @@ jobs:
 #          commit_message: ${{ github.event.head_commit.message }}
 #          # 自定义域名,CNAME记录.如果没有,可以删除这个参数,使用默认的github pages域名也访问 wangweihong.github.io
 #         # cname: ${{ secrets.DOMAIN }}
+  
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
+      - name: Show default environment variables
+        run: |
+          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
+          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
+          echo "The run id is: $GITHUB_RUN_ID"
+          echo "The GitHub Actor's username is: $GITHUB_ACTOR"
+          echo "GitHub SHA: $GITHUB_SHA"
