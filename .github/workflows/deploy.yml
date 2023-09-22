@@ -39,7 +39,6 @@ jobs:
       - name: Deploy Web
         # only deploy when master branch changes
         if: {{ github.event_name == 'push' && GITHUB_REF_NAME == 'master' }}
-        run: echo I run
         uses: peaceiris/actions-gh-pages@v3
         with:
           # GitHub Personal Access Tokens 用于访问 GitHub 仓库
