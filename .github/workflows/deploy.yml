@@ -2,15 +2,10 @@
 name: deploy
 on:
   push:
-#    branches:
-#      - master
-#    pull_request:
-#      types: [opened, reopened, synchronize, ready_for_review]
-
-env:
-  COMMIT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-  BRANCH: ${{ github.event_name == 'pull_request' && format('refs/heads/{0}', github.event.pull_request.head.ref) || github.ref }}
-
+    branches:
+      - master
+  pull_request:
+      types: [opened, reopened, synchronize, ready_for_review]
 jobs:
   # 构建静态HTML代码并推送到GithubPages
   build-and-deploy:
@@ -41,55 +36,22 @@ jobs:
       - name: Build Web
         run: hugo
 
-#      - name: Deploy Web
-#        uses: peaceiris/actions-gh-pages@v3
-#        with:
-#          # GitHub Personal Access Tokens 用于访问 GitHub 仓库
-#          # 1. 需要到Your Profile/Setting/DevelopSettings/创建Personal access tokens添加repo/*权限
-#          # 2. 并在bloggen仓库的 Setting/Secrets，创建名为BLOG_TOKEN的secret,值为token值 中以供 Workflow 使用
-#          PERSONAL_TOKEN: ${{ secrets.BLOG_TOKEN }}
-#          #  部署到的 GitHub Pages 仓库
-#          EXTERNAL_REPOSITORY: wangweihong/wangweihong.github.io
-#          PUBLISH_BRANCH: master
-#          # hugo 静态html文件目录。（在此例中，Hugo 输出位于 ./public 目录中）。
-#          PUBLISH_DIR: ./public
-#          # 提交更改时使用的提交消息，从上游分支获取
-#          commit_message: ${{ github.event.head_commit.message }}
-#          # 自定义域名,CNAME记录.如果没有,可以删除这个参数,使用默认的github pages域名也访问 wangweihong.github.io
-#         # cname: ${{ secrets.DOMAIN }}
-  
-  dump:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump job context
-        env:
-          JOB_CONTEXT: ${{ toJson(job) }}
-        run: echo "$JOB_CONTEXT"
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-        run: echo "$STEPS_CONTEXT"
-      - name: Dump runner context
-        env:
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-        run: echo "$RUNNER_CONTEXT"
-      - name: Dump strategy context
-        env:
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        run: echo "$STRATEGY_CONTEXT"
-      - name: Dump matrix context
-        env:
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
-
-      - name: Show default environment variables
-        run: |
-          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
-          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
-          echo "The run id is: $GITHUB_RUN_ID"
-          echo "The GitHub Actor's username is: $GITHUB_ACTOR"
-          echo "GitHub SHA: $GITHUB_SHA"
+      - name: Deploy Web
+        # only deploy when master branch changes
+        if: {{ github.event_name == 'push' && GITHUB_REF_NAME == 'master' }}
+        run: echo I run
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # GitHub Personal Access Tokens 用于访问 GitHub 仓库
+          # 1. 需要到Your Profile/Setting/DevelopSettings/创建Personal access tokens添加repo/*权限
+          # 2. 并在bloggen仓库的 Setting/Secrets，创建名为BLOG_TOKEN的secret,值为token值 中以供 Workflow 使用
+          PERSONAL_TOKEN: ${{ secrets.BLOG_TOKEN }}
+          #  部署到的 GitHub Pages 仓库
+          EXTERNAL_REPOSITORY: wangweihong/wangweihong.github.io
+          PUBLISH_BRANCH: master
+          # hugo 静态html文件目录。（在此例中，Hugo 输出位于 ./public 目录中）。
+          PUBLISH_DIR: ./public
+          # 提交更改时使用的提交消息，从上游分支获取
+          commit_message: ${{ github.event.head_commit.message }}
+          # 自定义域名,CNAME记录.如果没有,可以删除这个参数,使用默认的github pages域名也访问 wangweihong.github.io
+         # cname: ${{ secrets.DOMAIN }}
